@@ -62,9 +62,13 @@ python auto_run.py
 
 This project is based on the original work by [MarkPengJZ](https://github.com/MarkPengJZ/AutoClicker-with-ImageDetection) with enhancements for multiple target images and better UI.
 
+### AI Assistance
+
+This project was developed with the assistance of Claude AI.
+
 ## License
 
 MIT License - See LICENSE file for details.
 
 ---
-© 2023 ImageAutoClicker-py
+© 2025 ImageAutoClicker-py
