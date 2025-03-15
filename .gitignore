@@ -1,0 +1,29 @@
+# Ignore snips directory (temporary image files)
+snips/
+
+# Python bytecode files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+env/
+.env/
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# PyCharm and other IDE settings
+.idea/
+.vscode/
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Logs and databases
+*.log
+*.sqlite3 
