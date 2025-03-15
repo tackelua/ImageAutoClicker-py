@@ -5,12 +5,14 @@ An application that automatically clicks when it finds a matching image on the s
 ## Features
 
 - Select specific screen areas for searching
+- **Support for multiple target images** - click on whichever is found first
 - Use existing images or crop directly from the screen
 - Adjust detection precision (with OpenCV)
 - Preview click locations without actually clicking
 - Return mouse to original position after clicking
 - Visual feedback with status indicators
 - Customizable delay between clicks
+- **Auto-save and restore settings** between sessions
 
 ## Installation
 
@@ -75,10 +77,10 @@ An application that automatically clicks when it finds a matching image on the s
 
 2. Select a screen area where the application will search for your target image.
 
-3. Either select an existing image file or crop a new one from the screen.
+3. **Add one or more target images** either by selecting existing image files or cropping directly from the screen.
 
 4. Adjust the settings:
-   - Match Precision: Higher for exact matches, lower for more flexible detection (requires OpenCV)
+   - Match Precision: Higher for exact matches (default: 0.8), lower for more flexible detection (requires OpenCV)
    - Delay: Time in seconds between each search/click
    - Preview Mode: Check to see detection without clicking
    - Return Mouse Position: Enable/disable returning mouse to original position after clicking
@@ -86,6 +88,8 @@ An application that automatically clicks when it finds a matching image on the s
 5. Click "Start" to begin the automatic detection and clicking.
 
 6. Click "Stop" at any time to stop the process.
+
+7. **Your settings and target images will be automatically saved** and restored the next time you run the application.
 
 ## Troubleshooting
 
@@ -102,6 +106,8 @@ This project is based on the original work by [Mark Peng (MarkPengJZ)](https://g
 - Fixed image cropping issues (removing borders from selection)
 - Added preview mode
 - Added return mouse feature
+- **Added support for multiple target images**
+- **Added auto-save and restore settings**
 - Added detailed error reporting
 
 ### AI Assistance
