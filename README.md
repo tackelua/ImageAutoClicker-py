@@ -21,12 +21,33 @@ An application that automatically clicks when it finds a matching image on the s
 - Python 3.7 or higher
 - Pip (Python package installer)
 
-### Option 1: Installation with Virtual Environment (Recommended)
+### Option 1: Automatic Installation with Starter Script (Recommended)
+
+The easiest way to get started is to use the starter script, which automatically:
+- Creates a virtual environment
+- Installs all dependencies
+- Ensures all directories are created
+- Runs the application
 
 1. Clone this repository:
    ```
    git clone https://github.com/tackelua/ImageAutoClicker-py.git
-   cd ImageAutoClicker-with-ImageDetection
+   cd ImageAutoClicker-py
+   ```
+
+2. Run the starter script:
+   ```
+   python starter.py
+   ```
+
+That's it! The starter script will set up everything automatically.
+
+### Option 2: Manual Installation with Virtual Environment
+
+1. Clone this repository:
+   ```
+   git clone https://github.com/tackelua/ImageAutoClicker-py.git
+   cd ImageAutoClicker-py
    ```
 
 2. Create and activate a virtual environment:
@@ -45,12 +66,12 @@ An application that automatically clicks when it finds a matching image on the s
    pip install -r requirements.txt
    ```
 
-### Option 2: Direct Installation
+### Option 3: Direct Installation (System Python)
 
 1. Clone this repository:
    ```
    git clone https://github.com/tackelua/ImageAutoClicker-py.git
-   cd ImageAutoClicker-with-ImageDetection
+   cd ImageAutoClicker-py
    ```
 
 2. Install dependencies:
@@ -65,14 +86,27 @@ An application that automatically clicks when it finds a matching image on the s
 
 ## Usage
 
+### Using the Starter Script (Recommended)
+
+Simply run:
+```
+python starter.py
+```
+
+This will set up the environment and start the application automatically.
+
+If you want to use your system Python instead of a virtual environment:
+```
+python starter.py --no-venv
+```
+
+### Running Directly
+
+If you've already set up the environment manually:
+
 1. Run the application:
    ```
    python auto_clicker.py
-   ```
-   
-   Or use the starter script (which checks dependencies):
-   ```
-   python starter.py
    ```
 
 2. Select a screen area where the application will search for your target image.
