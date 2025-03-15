@@ -2,6 +2,8 @@
 
 An application that automatically clicks when it finds a matching image on the screen.
 
+**Version: 1.0.0**
+
 ## Features
 
 - Select specific screen areas for searching
