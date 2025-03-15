@@ -8,6 +8,7 @@ An application that automatically clicks when it finds a matching image on the s
 - Use existing images or crop directly from the screen
 - Adjust detection precision (with OpenCV)
 - Preview click locations without actually clicking
+- Return mouse to original position after clicking
 - Visual feedback with status indicators
 - Customizable delay between clicks
 
@@ -80,6 +81,7 @@ An application that automatically clicks when it finds a matching image on the s
    - Match Precision: Higher for exact matches, lower for more flexible detection (requires OpenCV)
    - Delay: Time in seconds between each search/click
    - Preview Mode: Check to see detection without clicking
+   - Return Mouse Position: Enable/disable returning mouse to original position after clicking
 
 5. Click "Start" to begin the automatic detection and clicking.
 
@@ -99,6 +101,7 @@ This project is based on the original work by [Mark Peng (MarkPengJZ)](https://g
 - Added support for OpenCV-based image detection with adjustable precision
 - Fixed image cropping issues (removing borders from selection)
 - Added preview mode
+- Added return mouse feature
 - Added detailed error reporting
 
 ### AI Assistance
