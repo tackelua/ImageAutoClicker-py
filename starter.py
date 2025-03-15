@@ -1,41 +1,56 @@
-import subprocess
-import sys
+"""
+Starter script for Auto Clicker with Image Detection
+"""
 import os
+import sys
+import subprocess
 
-# Python environment information
-print(f"Python Version: {sys.version}")
-print(f"Python Path: {sys.executable}")
-
-# We don't create the snips directory here anymore
-# It will be created when needed during application usage
-
-# Check required modules
-modules_to_check = ['pyautogui', 'PIL', 'PyQt5']
-missing_modules = []
-
-for module in modules_to_check:
+def check_environment():
+    """Check if the environment is properly set up"""
     try:
-        __import__(module)
-        print(f"Module {module} is installed.")
-    except ImportError:
-        missing_modules.append(module)
-        print(f"Module {module} is NOT installed.")
+        import PyQt5
+        import pyautogui
+        from PIL import Image
+        try:
+            import cv2
+            print("✅ OpenCV is installed. Full functionality available.")
+        except ImportError:
+            print("⚠️ OpenCV is not installed. Some features will be limited.")
+            print("To install OpenCV: pip install opencv-python")
+        
+        print("✅ All core dependencies are installed.")
+        return True
+    except ImportError as e:
+        print(f"❌ Missing dependency: {e}")
+        print("Please install all dependencies: pip install -r requirements.txt")
+        return False
 
-# Install missing modules
-if missing_modules:
-    print("\nInstalling missing modules...")
-    module_install_cmd = [sys.executable, "-m", "pip", "install"] + missing_modules
-    result = subprocess.run(module_install_cmd, capture_output=True, text=True)
-    print(result.stdout)
-    if result.returncode != 0:
-        print(f"Error installing modules: {result.stderr}")
-        sys.exit(1)
+def ensure_snips_directory():
+    """Ensure the snips directory exists"""
+    if not os.path.exists("snips"):
+        os.makedirs("snips")
+        print("✅ Created 'snips' directory for storing images.")
     else:
-        print("Successfully installed all required modules.")
+        print("✅ 'snips' directory already exists.")
 
-# Launch the main application
-print("\nLaunching auto_clicker.py...")
-try:
-    subprocess.run([sys.executable, "auto_clicker.py"])
-except Exception as e:
-    print(f"Error running auto_clicker.py: {e}")
+def start_application():
+    """Start the auto clicker application"""
+    print("Starting Auto Clicker with Image Detection...")
+    try:
+        # Run the module in a separate process to ensure clean exit
+        subprocess.run([sys.executable, "auto_clicker.py"], check=True)
+    except subprocess.CalledProcessError as e:
+        print(f"❌ Error running application: {e}")
+        sys.exit(1)
+    except Exception as e:
+        print(f"❌ Unexpected error: {e}")
+        sys.exit(1)
+
+if __name__ == "__main__":
+    print("=== Auto Clicker with Image Detection ===")
+    if check_environment():
+        ensure_snips_directory()
+        start_application()
+    else:
+        print("❌ Environment check failed. Please install required dependencies.")
+        sys.exit(1)

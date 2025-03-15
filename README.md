@@ -1,58 +1,105 @@
-# AutoClicker with Image Detection
+# Auto Clicker with Image Detection
 
-Automatically finds and clicks images on your screen.
+An application that automatically clicks when it finds a matching image on the screen.
 
-## Quick Setup
+## Features
 
-### Option 1: Using starter.py (Recommended)
-```
-python starter.py
-```
+- Select specific screen areas for searching
+- Use existing images or crop directly from the screen
+- Adjust detection precision (with OpenCV)
+- Preview click locations without actually clicking
+- Visual feedback with status indicators
+- Customizable delay between clicks
 
-### Option 2: Manual Setup
-```
-# Install required libraries
-pip install pyautogui pillow PyQt5
-# Run the application
-python auto_clicker.py
-```
+## Installation
 
-## How to Use
+### Prerequisites
 
-1. **Select Screen Area**
-   - Click the "Select Screen Area" button
-   - Drag mouse to select the area to search
-   - Release to confirm
+- Python 3.7 or higher
+- Pip (Python package installer)
 
-2. **Select Target Image**
-   - Option A: Click "Select Image File" to choose an image from your computer
-   - Option B: Click "Crop from Screen" to select an image directly from your screen
+### Option 1: Installation with Virtual Environment (Recommended)
 
-3. **Set and Go**
-   - Set delay time in seconds
-   - Click "Start" to begin searching and clicking
-   - Click "Stop" to end the process
+1. Clone this repository:
+   ```
+   git clone https://github.com/tackelua/ImageAutoClicker-py.git
+   cd ImageAutoClicker-with-ImageDetection
+   ```
+
+2. Create and activate a virtual environment:
+   ```
+   # Windows
+   python -m venv venv
+   .\venv\Scripts\activate
+
+   # macOS/Linux
+   python -m venv venv
+   source venv/bin/activate
+   ```
+
+3. Install dependencies:
+   ```
+   pip install -r requirements.txt
+   ```
+
+### Option 2: Direct Installation
+
+1. Clone this repository:
+   ```
+   git clone https://github.com/tackelua/ImageAutoClicker-py.git
+   cd ImageAutoClicker-with-ImageDetection
+   ```
+
+2. Install dependencies:
+   ```
+   pip install PyQt5 pyautogui Pillow
+   ```
+
+3. Optional: Install OpenCV for enhanced image detection:
+   ```
+   pip install opencv-python
+   ```
+
+## Usage
+
+1. Run the application:
+   ```
+   python auto_clicker.py
+   ```
+   
+   Or use the starter script (which checks dependencies):
+   ```
+   python starter.py
+   ```
+
+2. Select a screen area where the application will search for your target image.
+
+3. Either select an existing image file or crop a new one from the screen.
+
+4. Adjust the settings:
+   - Match Precision: Higher for exact matches, lower for more flexible detection (requires OpenCV)
+   - Delay: Time in seconds between each search/click
+   - Preview Mode: Check to see detection without clicking
+
+5. Click "Start" to begin the automatic detection and clicking.
+
+6. Click "Stop" at any time to stop the process.
 
 ## Troubleshooting
 
-- If image detection fails, try selecting a clearer image or a larger search area
-- Ensure cropped areas are at least 10x10 pixels
-- The search continues until you click "Stop"
-
-## Development Notes
-
-- The application will automatically create a `snips` directory to store temporary images when needed
-- The `snips` directory is added to `.gitignore` and should not be included in source control
+- **"Confidence" keyword error**: Install OpenCV with `pip install opencv-python`
+- **Image not detected**: Try lowering the precision value or ensuring the screen area is correctly selected
+- **Clicking wrong position**: Make sure the cropped image doesn't have borders or background elements
 
 ## Credits and License
 
-This project is a modified version of [AutoClicker-with-ImageDetection](https://github.com/MarkPengJZ/AutoClicker-with-ImageDetection) by MarkPengJZ.
+This project is based on the original work by [Mark Peng (MarkPengJZ)](https://github.com/MarkPengJZ/AutoClicker-with-ImageDetection) with the following improvements:
 
-Modifications include:
-- English translation of the user interface
-- Improved code organization and error handling
-- Better handling of temporary files
-- Added development tools and documentation
+- Enhanced UI with better visual feedback
+- Added support for OpenCV-based image detection with adjustable precision
+- Fixed image cropping issues (removing borders from selection)
+- Added preview mode
+- Added detailed error reporting
 
 ### AI Assistance
 
@@ -60,7 +107,7 @@ The modifications and improvements to this project were implemented with the ass
 
 ## License
 
-This project is distributed under the MIT License. See the LICENSE file for details.
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 ---
 © 2025 ImageAutoClicker-py
