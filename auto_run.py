@@ -1,5 +1,6 @@
 """
-Starter script for Auto Clicker with Image Detection
+Auto Run script for Auto Clicker with Image Detection.
+This script automatically sets up the environment and runs the application.
 """
 import os
 import sys
@@ -104,4 +105,4 @@ if __name__ == "__main__":
             start_application()
         else:
             print("❌ Environment check failed. Please install required dependencies.")
-            sys.exit(1)
+            sys.exit(1) 

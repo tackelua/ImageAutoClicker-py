@@ -8,14 +8,14 @@ from PIL import ImageGrab, Image
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QPixmap
 
-# Kiểm tra xem OpenCV có được cài đặt hay không
+# Check if OpenCV is installed
 OPENCV_AVAILABLE = False
 try:
     import cv2
     OPENCV_AVAILABLE = True
 except ImportError:
-    print("OpenCV không được cài đặt. Tính năng 'confidence' sẽ không hoạt động.")
-    print("Để cài OpenCV, hãy chạy: pip install opencv-python")
+    print("OpenCV is not installed. The 'confidence' feature will not work.")
+    print("To install OpenCV, run: pip install opencv-python")
 
 
 def ensure_snips_directory():
@@ -36,29 +36,26 @@ class App(QtWidgets.QMainWindow):
         # We don't create snips directory on startup anymore
         # It will be created when needed
         
-        # Danh sách các hình ảnh cần tìm
+        # List of target images
         self.target_images = []
         self.current_selected_image = -1
         
-        # Timer cho hiệu ứng nhấp nháy nút Stop
+        # Timer for blinking stop button effect
         self.blink_timer = QtCore.QTimer()
         self.blink_timer.timeout.connect(self.blink_stop_button)
         self.blink_state = False
         
         self.initUI()
         
-        # Đảm bảo thư mục snips tồn tại
-        ensure_snips_directory()
-        
-        # Khởi tạo chỉ báo trạng thái ban đầu
+        # Initialize initial status indicator
         self.status_indicator.setText("⚫")
         self.status_indicator.setStyleSheet("font-size: 20px; color: gray;")
         
-        # Tự động load cài đặt khi khởi động
+        # Auto load settings at startup
         self.load_settings()
 
     def initUI(self):
-        self.setGeometry(300, 200, 400, 600)  # Tăng thêm chiều cao
+        self.setGeometry(300, 200, 400, 600)  # Increased height
         self.setWindowTitle("Auto Clicker with Image Detection")
 
         # Main layout
@@ -66,13 +63,6 @@ class App(QtWidgets.QMainWindow):
         self.central_widget = QtWidgets.QWidget()
         self.central_widget.setLayout(self.main_layout)
         self.setCentralWidget(self.central_widget)
-
-        # Instructions
-        self.instruction_label = QtWidgets.QLabel(self)
-        self.instruction_label.setText("*Instructions*\n1. Select screen area to search for images\n"
-                                      "2. Select target image from file or crop from screen\n"
-                                      "3. Set delay time and click Start")
-        self.main_layout.addWidget(self.instruction_label)
 
         # Screen area selection
         self.screen_group = QtWidgets.QGroupBox("Screen Search Area")
@@ -107,21 +97,20 @@ class App(QtWidgets.QMainWindow):
         
         self.image_layout.addLayout(self.image_buttons_layout)
 
-        # Danh sách hình ảnh
+        # Image list
         self.images_list_widget = QtWidgets.QListWidget()
         self.images_list_widget.setMaximumHeight(100)
         self.images_list_widget.itemClicked.connect(self.on_image_selected)
         self.image_layout.addWidget(self.images_list_widget)
         
-        # Nút xóa hình ảnh
+        # Remove image button
         self.remove_image_btn = QtWidgets.QPushButton("Remove Selected Image")
         self.remove_image_btn.clicked.connect(self.remove_selected_image)
         self.image_layout.addWidget(self.remove_image_btn)
 
-        # Xem trước hình ảnh
+        # Image preview
         self.image_preview = QtWidgets.QLabel(self)
-        self.image_preview.setFixedSize(200, 150)
-        self.image_preview.setStyleSheet("border: 2px solid black;")
+        self.image_preview.setMaximumHeight(150)
         self.image_preview.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.image_preview.setText("No image")
         self.image_layout.addWidget(self.image_preview)
@@ -146,7 +135,7 @@ class App(QtWidgets.QMainWindow):
         self.return_mouse_checkbox.setChecked(True)
         self.options_layout.addWidget(self.return_mouse_checkbox)
         
-        # Install OpenCV button (hiển thị nếu chưa cài OpenCV)
+        # Install OpenCV button (shown if OpenCV is not installed)
         if not OPENCV_AVAILABLE:
             self.install_opencv_btn = QtWidgets.QPushButton("Install OpenCV (required for precision matching)")
             self.install_opencv_btn.setStyleSheet("background-color: #2196F3; color: white;")
@@ -174,22 +163,22 @@ class App(QtWidgets.QMainWindow):
         self.confidence_slider.valueChanged.connect(self.update_confidence)
         self.confidence_layout.addWidget(self.confidence_slider)
         
-        # Labels để giải thích ý nghĩa hai đầu slider
+        # Labels for explaining slider ends meaning
         self.confidence_descriptions = QtWidgets.QHBoxLayout()
-        self.confidence_low = QtWidgets.QLabel("Tìm nhiều hơn")
-        self.confidence_high = QtWidgets.QLabel("Chính xác hơn")
+        self.confidence_low = QtWidgets.QLabel("More matches")
+        self.confidence_high = QtWidgets.QLabel("More accurate")
         self.confidence_high.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight)
         self.confidence_descriptions.addWidget(self.confidence_low)
         self.confidence_descriptions.addWidget(self.confidence_high)
         self.confidence_layout.addLayout(self.confidence_descriptions)
         
-        # Thêm thông báo nếu không có OpenCV
+        # Add warning if OpenCV is not installed
         if not OPENCV_AVAILABLE:
             self.opencv_warning = QtWidgets.QLabel("⚠️ OpenCV not installed. Precision control unavailable.")
             self.opencv_warning.setStyleSheet("color: #FF8C00; font-style: italic;")
             self.confidence_layout.addWidget(self.opencv_warning)
             
-            # Disable confidence slider nếu không có OpenCV
+            # Disable confidence slider if OpenCV is not installed
             self.confidence_slider.setEnabled(False)
         
         self.control_layout.addLayout(self.confidence_layout)
@@ -211,26 +200,35 @@ class App(QtWidgets.QMainWindow):
         self.click_delay_layout.addWidget(self.click_delay_label)
         self.click_delay_layout.addWidget(self.click_delay_input)
         self.control_layout.addLayout(self.click_delay_layout)
+        
+        # Delay after image found
+        self.move_delay_layout = QtWidgets.QHBoxLayout()
+        self.move_delay_label = QtWidgets.QLabel("Delay after image found (seconds):")
+        self.move_delay_input = QtWidgets.QLineEdit(self)
+        self.move_delay_input.setText("0")
+        self.move_delay_layout.addWidget(self.move_delay_label)
+        self.move_delay_layout.addWidget(self.move_delay_input)
+        self.control_layout.addLayout(self.move_delay_layout)
 
         # Start/Stop Buttons
         self.buttons_layout = QtWidgets.QHBoxLayout()
         
-        # Tạo nút Start rộng hơn
+        # Create wider Start button
         self.start_button = QtWidgets.QPushButton("Start Searching")
         self.start_button.setStyleSheet("background-color: #4CAF50; color: white; font-weight: bold; padding: 10px; font-size: 15px;")
-        # Thiết lập chính sách kích thước để nút Start mở rộng
+        # Set size policy to make Start button expand
         self.start_button.setSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Fixed)
         self.start_button.setMinimumHeight(40)
         self.start_button.clicked.connect(self.startButton)
         
-        # Tạo nút Stop
+        # Create Stop button
         self.stop_button = QtWidgets.QPushButton("STOP")
         self.stop_button.setStyleSheet("background-color: #f44336; color: white; font-weight: bold; padding: 10px; font-size: 15px;")
         self.stop_button.setSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Fixed)
         self.stop_button.setMinimumHeight(40)
         self.stop_button.clicked.connect(self.stopClick)
         
-        # Ban đầu, hiển thị nút Start và ẩn nút Stop
+        # Initially, show Start button and hide Stop button
         self.buttons_layout.addWidget(self.start_button)
         self.buttons_layout.addWidget(self.stop_button)
         self.stop_button.hide()
@@ -242,7 +240,7 @@ class App(QtWidgets.QMainWindow):
         # Status label
         self.status_layout = QtWidgets.QHBoxLayout()
         
-        # Thêm đèn chỉ báo trạng thái
+        # Add status indicator light
         self.status_indicator = QtWidgets.QLabel("⚪")
         self.status_indicator.setStyleSheet("font-size: 20px;")
         self.status_indicator.setFixedWidth(30)
@@ -288,14 +286,14 @@ class App(QtWidgets.QMainWindow):
         
         # Thread for image search
         self.search_thread = None
-        self.running = False 
+        self.running = False
 
     def update_confidence(self, value):
         """Update confidence value when slider is moved."""
         self.confidence = value / 10.0
         self.confidence_value_label.setText(str(self.confidence))
         
-        # Lưu cài đặt khi thay đổi
+        # Save settings when changed
         self.save_settings()
 
     def activateSnipping(self):
@@ -311,7 +309,7 @@ class App(QtWidgets.QMainWindow):
     def on_area_selected(self):
         """Handle the selected screen area."""
         try:
-            # Lấy tọa độ từ area_selector
+            # Get coordinates from area_selector
             self.search_area = {
                 "x1": self.area_selector.begin.x(),
                 "y1": self.area_selector.begin.y(),
@@ -321,7 +319,7 @@ class App(QtWidgets.QMainWindow):
                 "height": abs(self.area_selector.end.y() - self.area_selector.begin.y())
             }
             
-            # Hiển thị tọa độ thay vì hình ảnh
+            # Display coordinates instead of image
             self.search_area_label.setText(
                 f"Search area: ({self.search_area['x1']}, {self.search_area['y1']}) to "
                 f"({self.search_area['x2']}, {self.search_area['y2']})\n"
@@ -330,7 +328,7 @@ class App(QtWidgets.QMainWindow):
             
             self.status_label.setText("Search area selected")
             
-            # Lưu cài đặt khi thay đổi
+            # Save settings when changed
             self.save_settings()
             
         except Exception as e:
@@ -339,22 +337,22 @@ class App(QtWidgets.QMainWindow):
     def on_image_cropped(self):
         """Handle the cropped image."""
         try:
-            # Kiểm tra xem thư mục snips có tồn tại không
+            # Check if snips directory exists
             ensure_snips_directory()
             
-            # Tạo tên file duy nhất dựa trên thời gian
+            # Create unique filename based on time
             timestamp = int(time.time())
             image_filename = f"snips/image_{timestamp}.png"
             
-            # Lưu hình ảnh đã cắt
+            # Save cropped image
             self.image_snipper.cropped_image.save(image_filename)
             
-            # Thêm vào danh sách
+            # Add to list
             self.add_image_to_list(image_filename)
             
             self.status_label.setText(f"Image cropped and saved as {image_filename}")
             
-            # Lưu cài đặt khi thay đổi
+            # Save settings when changed
             self.save_settings()
             
         except Exception as e:
@@ -371,7 +369,7 @@ class App(QtWidgets.QMainWindow):
                 self.add_image_to_list(file_path)
                 self.status_label.setText(f"Image selected: {os.path.basename(file_path)}")
                 
-                # Lưu cài đặt khi thay đổi
+                # Save settings when changed
                 self.save_settings()
         except Exception as e:
             self.status_label.setText(f"Error: {str(e)}")
@@ -379,41 +377,65 @@ class App(QtWidgets.QMainWindow):
     def add_image_to_list(self, image_path):
         """Add an image to the list widget and target images list."""
         if image_path and os.path.exists(image_path):
-            # Thêm vào danh sách nếu chưa có
+            # Add to list if not already present
             if image_path not in self.target_images:
                 self.target_images.append(image_path)
                 
-                # Thêm vào list widget
+                # Add to list widget
                 item = QtWidgets.QListWidgetItem(os.path.basename(image_path))
                 item.setData(QtCore.Qt.ItemDataRole.UserRole, image_path)
                 self.images_list_widget.addItem(item)
                 
-                # Chọn hình ảnh vừa thêm
+                # Select added image
                 self.images_list_widget.setCurrentRow(self.images_list_widget.count() - 1)
                 self.on_image_selected(item)
 
     def on_image_selected(self, item):
         """Handle image selection from the list."""
         try:
-            # Lấy đường dẫn từ item
+            # Get path from item
             image_path = item.data(QtCore.Qt.ItemDataRole.UserRole)
             
             if image_path and os.path.exists(image_path):
-                # Lưu index của hình ảnh đang chọn
+                # Save selected image index
                 self.current_selected_image = self.images_list_widget.currentRow()
                 
-                # Hiển thị hình ảnh xem trước
+                # Display selected image for preview
                 pixmap = QPixmap(image_path)
-                scaled_pixmap = pixmap.scaled(
-                    self.image_preview.width(), 
-                    self.image_preview.height(),
-                    QtCore.Qt.AspectRatioMode.KeepAspectRatio
-                )
-                self.image_preview.setPixmap(scaled_pixmap)
                 
-                # Hiển thị kích thước hình ảnh trong debug label
+                # Get original image dimensions
                 img = Image.open(image_path)
-                self.debug_label.setText(f"Image size: {img.width}x{img.height} pixels")
+                img_width, img_height = img.width, img.height
+                
+                # Set maximum size while maintaining aspect ratio
+                max_height = 150
+                
+                if img_height > max_height:
+                    # Scale down while maintaining aspect ratio
+                    scaled_pixmap = pixmap.scaled(
+                        img_width * max_height // img_height, 
+                        max_height,
+                        QtCore.Qt.AspectRatioMode.KeepAspectRatio
+                    )
+                else:
+                    # Use original size if smaller than max height
+                    scaled_pixmap = pixmap
+                
+                # Apply 1px red border to the image
+                painter = QtGui.QPainter()
+                bordered_pixmap = QtGui.QPixmap(scaled_pixmap.width() + 2, scaled_pixmap.height() + 2)
+                bordered_pixmap.fill(QtCore.Qt.GlobalColor.transparent)
+                
+                painter.begin(bordered_pixmap)
+                painter.setPen(QtGui.QPen(QtGui.QColor('red'), 1))
+                painter.drawRect(0, 0, bordered_pixmap.width() - 1, bordered_pixmap.height() - 1)
+                painter.drawPixmap(1, 1, scaled_pixmap)
+                painter.end()
+                
+                self.image_preview.setPixmap(bordered_pixmap)
+                
+                # Display image size in debug label
+                self.debug_label.setText(f"Image size: {img_width}x{img_height} pixels")
         except Exception as e:
             self.status_label.setText(f"Error: {str(e)}")
 
@@ -422,18 +444,18 @@ class App(QtWidgets.QMainWindow):
         try:
             current_row = self.images_list_widget.currentRow()
             if current_row >= 0:
-                # Lấy item và đường dẫn
+                # Get item and path
                 item = self.images_list_widget.item(current_row)
                 image_path = item.data(QtCore.Qt.ItemDataRole.UserRole)
                 
-                # Xóa khỏi danh sách
+                # Remove from list
                 if image_path in self.target_images:
                     self.target_images.remove(image_path)
                 
-                # Xóa khỏi list widget
+                # Remove from list widget
                 self.images_list_widget.takeItem(current_row)
                 
-                # Cập nhật preview
+                # Update preview
                 if self.images_list_widget.count() > 0:
                     self.images_list_widget.setCurrentRow(0)
                     self.on_image_selected(self.images_list_widget.item(0))
@@ -444,7 +466,7 @@ class App(QtWidgets.QMainWindow):
                 
                 self.status_label.setText(f"Removed: {os.path.basename(image_path)}")
                 
-                # Lưu cài đặt khi thay đổi
+                # Save settings when changed
                 self.save_settings()
         except Exception as e:
             self.status_label.setText(f"Error: {str(e)}")
@@ -452,7 +474,7 @@ class App(QtWidgets.QMainWindow):
     def startButton(self):
         """Start the image search and click process."""
         try:
-            # Kiểm tra xem đã chọn vùng tìm kiếm chưa
+            # Check if search area is selected
             if (self.search_area["x1"] is None or 
                 self.search_area["y1"] is None or 
                 self.search_area["x2"] is None or 
@@ -460,12 +482,12 @@ class App(QtWidgets.QMainWindow):
                 self.status_label.setText("Error: Please select a search area first")
                 return
             
-            # Kiểm tra xem có hình ảnh nào để tìm không
+            # Check if there are any images to search
             if not self.target_images:
                 self.status_label.setText("Error: Please select at least one target image")
                 return
             
-            # Kiểm tra thời gian delay
+            # Check delay time
             try:
                 delay_time = float(self.delay_input.text())
                 if delay_time < 0:
@@ -475,34 +497,34 @@ class App(QtWidgets.QMainWindow):
                 self.status_label.setText("Error: Invalid delay time")
                 return
             
-            # Nếu đang chạy, dừng thread hiện tại
+            # If running, stop current thread
             if self.running:
                 self.stopClick()
             
-            # Đặt cờ chạy
+            # Set running flag
             self.running = True
             self.stop_while = False
             self.stop_for = False
             
-            # Tạo và khởi động thread mới
+            # Create and start new thread
             self.search_thread = threading.Thread(target=self.search_and_click)
             self.search_thread.daemon = True
             self.search_thread.start()
             
-            # Cập nhật giao diện để hiển thị trạng thái đang chạy
+            # Update UI to show running state
             self.status_label.setText("Started searching...")
             self.status_label.setStyleSheet("font-weight: bold; font-size: 14px; padding: 5px; background-color: #e6ffe6;")
             self.status_indicator.setText("🟢")
             self.status_indicator.setStyleSheet("font-size: 20px; color: green;")
             self.setWindowTitle("Auto Clicker with Image Detection - RUNNING")
             
-            # Ẩn nút Start và hiện nút Stop
+            # Show Start button and hide Stop button
             self.start_button.hide()
             self.stop_button.show()
             
-            # Bắt đầu hiệu ứng nhấp nháy nút Stop
+            # Start blinking stop button effect
             self.blink_state = False
-            self.blink_timer.start(500)  # 500ms = 0.5 giây mỗi lần nhấp nháy
+            self.blink_timer.start(500)  # 500ms = 0.5 seconds between blinks
             
         except Exception as e:
             self.status_label.setText(f"Error: {str(e)}")
@@ -513,17 +535,17 @@ class App(QtWidgets.QMainWindow):
         self.stop_for = True
         self.running = False
         
-        # Dừng hiệu ứng nhấp nháy
+        # Stop blinking effect
         self.blink_timer.stop()
         
-        # Cập nhật giao diện để hiển thị trạng thái đã dừng
+        # Update UI to show stopped state
         self.status_label.setText("Stopped")
         self.status_label.setStyleSheet("font-weight: bold; font-size: 14px; padding: 5px;")
         self.status_indicator.setText("🔴")
         self.status_indicator.setStyleSheet("font-size: 20px; color: red;")
         self.setWindowTitle("Auto Clicker with Image Detection")
         
-        # Hiện nút Start và ẩn nút Stop
+        # Show Start button and hide Stop button
         self.start_button.show()
         self.stop_button.hide()
 
@@ -534,20 +556,28 @@ class App(QtWidgets.QMainWindow):
             preview_only = self.preview_checkbox.isChecked()
             return_mouse = self.return_mouse_checkbox.isChecked()
             
-            # Lấy thời gian chờ trước khi nhấp chuột
+            # Get delay before clicking
             try:
                 click_delay_time = float(self.click_delay_input.text())
                 if click_delay_time < 0:
                     click_delay_time = 0
             except ValueError:
                 click_delay_time = 0
+                
+            # Get delay after image found and before moving mouse
+            try:
+                move_delay_time = float(self.move_delay_input.text())
+                if move_delay_time < 0:
+                    move_delay_time = 0
+            except ValueError:
+                move_delay_time = 0
             
             while self.running and not self.stop_while:
-                # Lưu vị trí chuột ban đầu nếu cần
+                # Save initial mouse position if needed
                 if return_mouse:
                     original_position = pyautogui.position()
                 
-                # Chụp ảnh vùng tìm kiếm
+                # Take screenshot of search area
                 screenshot = ImageGrab.grab(bbox=(
                     self.search_area["x1"], 
                     self.search_area["y1"], 
@@ -555,7 +585,7 @@ class App(QtWidgets.QMainWindow):
                     self.search_area["y2"]
                 ))
                 
-                # Lưu ảnh chụp màn hình tạm thời
+                # Save temporary screenshot
                 ensure_snips_directory()
                 temp_screenshot_path = "snips/temp_screenshot.png"
                 screenshot.save(temp_screenshot_path)
@@ -563,7 +593,7 @@ class App(QtWidgets.QMainWindow):
                 found_image = False
                 found_image_path = ""
                 
-                # Tìm kiếm tất cả các hình ảnh mục tiêu
+                # Search for all target images
                 for image_path in self.target_images:
                     if self.stop_for:
                         break
@@ -571,31 +601,42 @@ class App(QtWidgets.QMainWindow):
                     if not os.path.exists(image_path):
                         continue
                     
-                    # Tìm hình ảnh
+                    # Search for image
                     location = self.find_image(temp_screenshot_path, image_path)
                     
                     if location:
                         found_image = True
                         found_image_path = image_path
                         
-                        # Tính toán vị trí click
+                        # Calculate click position
                         target_img = Image.open(image_path)
                         click_x = self.search_area["x1"] + location[0] + target_img.width // 2
                         click_y = self.search_area["y1"] + location[1] + target_img.height // 2
                         
-                        # Hiển thị thông tin
+                        # Display information
                         self.update_status(f"Found image: {os.path.basename(image_path)} at ({click_x}, {click_y})")
-                        # Cập nhật chỉ báo tìm thấy
+                        # Update found indicator
                         self.update_found_indicator()
                         
+                        # Wait after image found and before moving mouse
+                        if move_delay_time > 0:
+                            self.update_status(f"Waiting {move_delay_time}s before moving mouse...")
+                            for i in range(int(move_delay_time * 10)):
+                                if self.stop_for:
+                                    break
+                                time.sleep(0.1)
+                        
+                        if self.stop_for:
+                            break
+                        
                         if preview_only:
-                            # Chỉ di chuyển chuột đến vị trí, không click
+                            # Move mouse without clicking
                             pyautogui.moveTo(click_x, click_y)
                         else:
-                            # Di chuyển chuột đến vị trí trước
+                            # Move mouse to position before clicking
                             pyautogui.moveTo(click_x, click_y)
                             
-                            # Chờ đợi trước khi nhấp nếu có thời gian chờ
+                            # Wait before clicking if there's delay
                             if click_delay_time > 0:
                                 self.update_status(f"Waiting {click_delay_time}s before clicking...")
                                 for i in range(int(click_delay_time * 10)):
@@ -603,12 +644,12 @@ class App(QtWidgets.QMainWindow):
                                         break
                                     time.sleep(0.1)
                             
-                            # Click vào vị trí tìm thấy
+                            # Click at found position
                             if not self.stop_for:
                                 pyautogui.click()
                                 self.update_status(f"Clicked at ({click_x}, {click_y})")
                         
-                        # Trả chuột về vị trí ban đầu nếu cần
+                        # Move mouse back to original position if needed
                         if return_mouse and not preview_only:
                             pyautogui.moveTo(original_position)
                         
@@ -617,13 +658,13 @@ class App(QtWidgets.QMainWindow):
                 if not found_image:
                     self.update_status("Image not found")
                 
-                # Delay trước khi tìm kiếm tiếp
+                # Delay before searching again
                 for i in range(int(delay_time * 10)):
                     if self.stop_for:
                         break
                     time.sleep(0.1)
             
-            # Khi kết thúc, cập nhật UI
+            # When done, update UI
             self.update_ui_after_stop()
             
         except Exception as e:
@@ -653,8 +694,12 @@ class App(QtWidgets.QMainWindow):
             QtCore.Qt.ConnectionType.QueuedConnection,
             QtCore.Q_ARG(str, "font-size: 20px; color: blue;")
         )
-        # Cập nhật lại chỉ báo đang chạy sau 0.5 giây
-        QtCore.QTimer.singleShot(500, lambda: self.reset_running_indicator() if self.running else None)
+        
+        # Thay thế QTimer.singleShot bằng threading.Timer
+        if self.running:
+            timer = threading.Timer(0.5, self.reset_running_indicator)
+            timer.daemon = True
+            timer.start()
     
     def reset_running_indicator(self):
         """Reset status indicator back to running state."""
@@ -676,7 +721,7 @@ class App(QtWidgets.QMainWindow):
 
     def update_ui_after_stop(self):
         """Update UI elements after stopping the search."""
-        # Dừng timer nhấp nháy
+        # Stop blinking effect
         self.blink_timer.stop()
         
         QtCore.QMetaObject.invokeMethod(
@@ -695,7 +740,7 @@ class App(QtWidgets.QMainWindow):
             QtCore.Qt.ConnectionType.QueuedConnection,
             QtCore.Q_ARG(str, "Stopped")
         )
-        # Cập nhật trạng thái indicator và style
+        # Update running state indicator and style
         QtCore.QMetaObject.invokeMethod(
             self.status_label, 
             "setStyleSheet", 
@@ -714,7 +759,7 @@ class App(QtWidgets.QMainWindow):
             QtCore.Qt.ConnectionType.QueuedConnection,
             QtCore.Q_ARG(str, "font-size: 20px; color: red;")
         )
-        # Cập nhật tiêu đề cửa sổ
+        # Update window title
         QtCore.QMetaObject.invokeMethod(
             self, 
             "setWindowTitle", 
@@ -726,7 +771,7 @@ class App(QtWidgets.QMainWindow):
         """Find the template image in the screenshot."""
         try:
             if OPENCV_AVAILABLE:
-                # Sử dụng OpenCV để tìm kiếm với độ chính xác
+                # Use OpenCV for finding with accuracy
                 screenshot = cv2.imread(screenshot_path)
                 template = cv2.imread(template_path)
                 
@@ -740,7 +785,7 @@ class App(QtWidgets.QMainWindow):
                     return max_loc
                 return None
             else:
-                # Sử dụng pyautogui nếu không có OpenCV
+                # Use pyautogui if OpenCV is not installed
                 location = pyautogui.locate(
                     template_path, 
                     screenshot_path, 
@@ -759,7 +804,7 @@ class App(QtWidgets.QMainWindow):
             self.status_label.setText("Installing OpenCV... Please wait")
             self.install_opencv_btn.setEnabled(False)
             
-            # Tạo và khởi động thread để cài đặt
+            # Create and start thread to install
             install_thread = threading.Thread(target=self._run_install_opencv)
             install_thread.daemon = True
             install_thread.start()
@@ -802,7 +847,7 @@ class App(QtWidgets.QMainWindow):
     def save_settings(self):
         """Save current settings to a JSON file."""
         try:
-            # Đảm bảo thư mục snips tồn tại
+            # Ensure snips directory exists
             ensure_snips_directory()
             
             settings = {
@@ -810,6 +855,7 @@ class App(QtWidgets.QMainWindow):
                 "confidence": self.confidence,
                 "delay_time": self.delay_input.text(),
                 "click_delay_time": self.click_delay_input.text(),
+                "move_delay_time": self.move_delay_input.text(),  # Save delay setting
                 "return_mouse": self.return_mouse_checkbox.isChecked(),
                 "target_images": self.target_images
             }
@@ -854,6 +900,10 @@ class App(QtWidgets.QMainWindow):
                 # Load click delay time
                 if "click_delay_time" in settings:
                     self.click_delay_input.setText(settings["click_delay_time"])
+                    
+                # Load move delay time
+                if "move_delay_time" in settings:
+                    self.move_delay_input.setText(settings["move_delay_time"])
                 
                 # Load return mouse setting
                 if "return_mouse" in settings:
@@ -865,13 +915,18 @@ class App(QtWidgets.QMainWindow):
                         if os.path.exists(image_path):
                             self.add_image_to_list(image_path)
                 
+                # Automatically select the first image in the list if any exist
+                if self.images_list_widget.count() > 0:
+                    self.images_list_widget.setCurrentRow(0)
+                    self.on_image_selected(self.images_list_widget.item(0))
+                
                 self.status_label.setText("Settings loaded")
         except Exception as e:
             self.status_label.setText(f"Error loading settings: {str(e)}")
 
     def closeEvent(self, event):
         """Handle window close event."""
-        # Lưu cài đặt khi đóng ứng dụng
+        # Save settings when closing application
         self.save_settings()
         event.accept()
 
@@ -898,7 +953,7 @@ class ScreenAreaSelector(QtWidgets.QWidget):
         self.setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.CrossCursor))
         self.setStyleSheet("background-color: gray;")
         
-        # Ẩn widget khi khởi tạo
+        # Hide widget when created
         self.hide()
 
     def paintEvent(self, event):
@@ -923,7 +978,7 @@ class ScreenAreaSelector(QtWidgets.QWidget):
         """Handle mouse release event."""
         self.end = event.pos()
         
-        # Đảm bảo begin luôn là góc trên bên trái và end là góc dưới bên phải
+        # Ensure begin is always top left and end is bottom right
         x1 = min(self.begin.x(), self.end.x())
         y1 = min(self.begin.y(), self.end.y())
         x2 = max(self.begin.x(), self.end.x())
@@ -951,7 +1006,7 @@ class ImageCropWidget(QtWidgets.QWidget):
         self.setStyleSheet("background-color: gray;")
         self.cropped_image = None
         
-        # Ẩn widget khi khởi tạo
+        # Hide widget when created
         self.hide()
 
     def paintEvent(self, event):
@@ -977,22 +1032,22 @@ class ImageCropWidget(QtWidgets.QWidget):
         try:
             self.end = event.pos()
             
-            # Kiểm tra kích thước vùng chọn
+            # Check selected area size
             width = abs(self.end.x() - self.begin.x())
             height = abs(self.end.y() - self.begin.y())
             
             if width < 5 or height < 5:
-                # Vùng chọn quá nhỏ, hủy bỏ
+                # Selected area too small, cancel
                 self.hide()
                 return
             
-            # Đảm bảo begin luôn là góc trên bên trái và end là góc dưới bên phải
+            # Ensure begin is always top left and end is bottom right
             x1 = min(self.begin.x(), self.end.x())
             y1 = min(self.begin.y(), self.end.y())
             x2 = max(self.begin.x(), self.end.x())
             y2 = max(self.begin.y(), self.end.y())
             
-            # Chụp ảnh màn hình
+            # Take screenshot
             screenshot = ImageGrab.grab(bbox=(x1, y1, x2, y2))
             self.cropped_image = screenshot
             
