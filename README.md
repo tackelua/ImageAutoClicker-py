@@ -54,6 +54,10 @@ Modifications include:
 - Better handling of temporary files
 - Added development tools and documentation
 
+### AI Assistance
+
+The modifications and improvements to this project were implemented with the assistance of Claude AI (Anthropic). The project owner provided requirements and prompts, while Claude helped with code generation, debugging, and documentation.
+
 ## License
 
 This project is distributed under the MIT License. See the LICENSE file for details.
