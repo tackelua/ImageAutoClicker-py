@@ -44,5 +44,19 @@ python auto_clicker.py
 - The application will automatically create a `snips` directory to store temporary images when needed
 - The `snips` directory is added to `.gitignore` and should not be included in source control
 
+## Credits and License
+
+This project is a modified version of [AutoClicker-with-ImageDetection](https://github.com/MarkPengJZ/AutoClicker-with-ImageDetection) by MarkPengJZ.
+
+Modifications include:
+- English translation of the user interface
+- Improved code organization and error handling
+- Better handling of temporary files
+- Added development tools and documentation
+
+## License
+
+This project is distributed under the MIT License. See the LICENSE file for details.
+
 ---
-© 2023 AutoClicker with Image Detection
+© 2025 ImageAutoClicker-py
